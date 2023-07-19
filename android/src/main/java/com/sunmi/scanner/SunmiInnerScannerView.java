@@ -12,7 +12,7 @@ import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import com.facebook.react.bridge.*;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.sunmi.scan.*;
+import com.sunmi.camerascan.*;
 
 /**
  * Created by januslo on 2017/5/16.
