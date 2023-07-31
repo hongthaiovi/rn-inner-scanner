@@ -2,14 +2,19 @@ package com.sunmi.scanner;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+
 import com.facebook.react.bridge.*;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.sunmi.camerascan.*;
@@ -21,6 +26,7 @@ import com.sunmi.camerascan.*;
 public class SunmiInnerScannerView extends RelativeLayout implements Camera.PreviewCallback {
     private CameraPreview mPreview;
     private ImageScanner scanner;
+    private FinderView finder;
     private SoundUtils soundUtils;
     private AsyncDecode asyncDecode;
     private static final int PADDING=10;
@@ -40,7 +46,10 @@ public class SunmiInnerScannerView extends RelativeLayout implements Camera.Prev
             // ignore the error for the sound is not mandatory.
             Log.e(TAG,e.getMessage(),e);
         }
-        this.addView(mPreview);
+        LayoutInflater.from(context).inflate(R.layout.finder, this, true);
+        finder = (FinderView)findViewById(R.id.finder);
+//        this.addView(finder);
+//        this.addView(mPreview);
     }
 
     public void setXDensity(int desity) {
@@ -102,6 +111,12 @@ public class SunmiInnerScannerView extends RelativeLayout implements Camera.Prev
         this.removeView(this.mPreview);
         this.addView(this.mPreview,0);
     }
+    public static int dpToPx(int dp) {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+    public static int pxToDp(int px) {
+        return (int) (px / Resources.getSystem().getDisplayMetrics().density);
+    }
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         try {
@@ -127,9 +142,9 @@ public class SunmiInnerScannerView extends RelativeLayout implements Camera.Prev
                 }
 
                 Image source = new Image(width, height, "Y800");
-                Rect scanImageRect = new Rect(PADDING,PADDING,width-(2*PADDING),height-(2*PADDING));
-                source.setCrop(scanImageRect.top,scanImageRect.left,
-                        scanImageRect.width(),scanImageRect.height());
+                Rect cropRect = finder.getScanImageRect(size.width, size.height);
+                source.setCrop(cropRect.top,cropRect.left,cropRect.height(),cropRect.width());
+
                 source.setData(data);// 填充数据
                 asyncDecode = new AsyncDecode();
                 asyncDecode.setMute(this.isMute()>0);//静音
