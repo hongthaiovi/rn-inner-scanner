@@ -5,6 +5,7 @@ package com.sunmi.scanner;
  */
 
 import android.content.Context;
+import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.os.Handler;
@@ -64,6 +65,7 @@ public class CameraPreview extends TextureView implements TextureView.SurfaceTex
                 parameters.setPictureSize(picSizes.width,picSizes.height);
                 Camera.Size previewSizes = getBestSize(parameters.getSupportedPreviewSizes(),_surfaceTextureWidth,_surfaceTextureHeight);
                 parameters.setPreviewSize(previewSizes.width,previewSizes.height);
+                this._surfaceTexture.setDefaultBufferSize(previewSizes.width,previewSizes.height);
                 mPreviewing = true;
                 mCamera.setParameters(parameters);
                 mCamera.setPreviewTexture(this._surfaceTexture);
@@ -239,27 +241,36 @@ public class CameraPreview extends TextureView implements TextureView.SurfaceTex
         }
     }
 
-    public Camera.Size getBestSize(List<Camera.Size> supportedSizes, int maxWidth, int maxHeight) {
-        Camera.Size bestSize = null;
-        for (Camera.Size size : supportedSizes) {
-            if (size.width > maxWidth || size.height > maxHeight) {
-                continue;
-            }
+    public Camera.Size getBestSize(List<Camera.Size> sizes, int targetWidth, int targetHeight) {
+        final double ASPECT_TOLERANCE = 0.1;
+        double targetRatio = (double) targetWidth / targetHeight;
 
-            if (bestSize == null) {
-                bestSize = size;
-                continue;
-            }
+        Camera.Size optimalSize = null;
+        double minDiff = Double.MAX_VALUE;
 
-            int resultArea = bestSize.width * bestSize.height;
-            int newArea = size.width * size.height;
+        for (Camera.Size size : sizes) {
+            double ratio = (double) size.width / size.height;
+            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
 
-            if (newArea > resultArea) {
-                bestSize = size;
+            double diff = Math.abs(size.height - targetHeight);
+            if (diff < minDiff) {
+                optimalSize = size;
+                minDiff = diff;
             }
         }
 
-        return bestSize;
+        if (optimalSize == null) {
+            minDiff = Double.MAX_VALUE;
+            for (Camera.Size size : sizes) {
+                double diff = Math.abs(size.height - targetHeight);
+                if (diff < minDiff) {
+                    optimalSize = size;
+                    minDiff = diff;
+                }
+            }
+        }
+
+        return optimalSize;
     }
 
 }

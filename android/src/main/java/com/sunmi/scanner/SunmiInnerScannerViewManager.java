@@ -48,6 +48,9 @@ public class SunmiInnerScannerViewManager extends ViewGroupManager<SunmiInnerSca
     @ReactProp(name = "mute")
     public void setMute(SunmiInnerScannerView view, int mute){view.setMute(mute);}
 
+    @ReactProp(name = "flash")
+    public void setFlash(SunmiInnerScannerView view, int flash){view.setFlash(flash);}
+
     @Override
     public void addView(SunmiInnerScannerView parent, View child, int index) {
         parent.addView(child,index+1);

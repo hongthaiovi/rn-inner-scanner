@@ -96,8 +96,8 @@ public class SunmiInnerScannerView extends RelativeLayout implements Camera.Prev
         mPreview.setCameraType(cameraType);
     }
 
-    public void setFlash(boolean flag) {
-        mPreview.setFlash(flag);
+    public void setFlash(int flag) {
+        mPreview.setFlash(flag == 1);
     }
 
     public void stopCamera() {
